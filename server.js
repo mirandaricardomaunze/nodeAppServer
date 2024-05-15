@@ -19,7 +19,8 @@ app.use(cors())
 app.use('/register',routes)
 app.use('/login',routes)
 app.use('/subject',routes)
-
+app.use('/reset',routes)
+app.use('/newPassword',routes)
 
 
 const PORT=process.env.PORT||4000

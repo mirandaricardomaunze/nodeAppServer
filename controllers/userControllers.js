@@ -3,6 +3,7 @@ const User=require('../models/user')
 const bcrypt=require('bcrypt')
 const jwt=require('jsonwebtoken')
 const secretKey='fgdikhfrnyruhubbfdbfdseq'
+const nodemailer=require('nodemailer')
 
 const  register=async(req, res) => {
    try {
@@ -14,7 +15,7 @@ const  register=async(req, res) => {
    }
    const hashedPassword = await bcrypt.hash(password, 10);  
    const newUser =await User.create({
-       name: name,
+       name: name, 
        email: email,
        password: hashedPassword,
        createdAt: new Date(),
@@ -24,7 +25,7 @@ const  register=async(req, res) => {
     console.log('Usuário cadastrado com sucesso');
   }
    
-   } catch (error) {
+   } catch (error) { 
     res.status(400).json({ error: error.message });
     console.log('Tente usar o outro email este ja esta em uso: '+error);
     }
@@ -75,9 +76,89 @@ const senderMessageService=(req,res)=>{
   }
 
 }
+
+const resetPassword=async(req,res)=>{
+  const {email}=req.body
+  res.status(200).json({message:'Rota de nova senha'})
+  try {
+    const user=await User.findOne({email})
+    if (user) {
+      console.log('Usuario encontrado');
+    }else{
+      console.log('Usuario nao encontrado');
+    }
+
+    const token=jwt.sign({userId:user._id},secretKey,{expiresIn:'1h'})
+
+    const transporter=nodemailer.createTransport({
+      service:'Gmail',
+      host: "smtp.gmail.com",
+      port: 465,
+      secure:true,
+      auth:{
+        user:'mirandadeveloper22@gmail.com',
+        pass:'ioljcqywcagmnxdy'
+      }
+    })
+
+    const mailOptions={
+      from:'mirandadeveloper22@gmail.com',
+      to:email,
+      subject:'Recuperacao de senha. ',
+      html:`
+      <p>OLa ${user.email}<p>
+      <p>
+        Voce solicitou a recuperacao da senha. Clique no link abaixo 
+        para redefenir a sua senha 
+      <p>
+      <p> 
+        <a href='http://localhost:3000/NewPassword/${token}>Redefinir Senha<a>
+      <p>
+      <p>
+        Se voce nao solicitou essa recuperacao, ignore este email.
+      <p>` 
+    }
+
+  transporter.sendMail(mailOptions,
+    (error,info)=>{
+      if (error) {
+        console.log(`Erro ao enviar email: ${error}`);
+      }else{
+        console.log(`Email enviado: ${info.response}`);
+      }
+    }
+  )
+  } catch (error) {
+    console.log(`Erro interno do servidor  ${error}`);
+  }
+}
+
+const newPassword=async(req,res)=>{
+const token=req.params
+const newpassword=req.body
+try {
+  const decodedToken=jwt.verify(token,secretKey);
+  const userId=decodedToken.userId;
+  const user=User.finById(userId);
+  if (user) {
+    console.log('O usaurio encontrado');
+  } else {
+    console.log('Usuario nao encontrado');
+  }
+
+  const passwordHashed=bcrypt.hash(newpassword,10)
+    user.password = passwordHashed;
+   await user.save()
+} catch (error) {
+  
+}
+}
+
       
 module.exports={ 
   register,
   login,
-  senderMessageService
+  senderMessageService,
+  resetPassword,
+  newPassword
 } 
