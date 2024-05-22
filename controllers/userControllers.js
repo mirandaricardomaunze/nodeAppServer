@@ -65,8 +65,8 @@ findUser()
 
 const senderMessageService=(req,res)=>{
   res.status(200).json({message:'Mensagem recebida com sucesso'})
+  const {name,email,subject}=req.body
   try {
-    const {name,email,subject}=req.body
     if (!name ||!email||!subject) {
       console.log('E obrigatorio preencher com dados  corretos');
     }
@@ -74,6 +74,37 @@ const senderMessageService=(req,res)=>{
   } catch (error) {
    console.log(error); 
   }
+  const transporter=nodemailer.createTransport({
+    service:'Gmail',
+    host: "smtp.gmail.com",
+    port: 465,
+    secure:true,
+    auth:{
+      user:'mirandadeveloper22@gmail.com',
+      pass:'ioljcqywcagmnxdy'
+    }
+  })
+  const mailOptions={
+    from:'mirandadeveloper22@gmail.com',
+    to:email,
+    subject:'Cliente. ',
+    html:`
+    <p>Saudacoes Calorosas <p>
+    <p>${subject}<p>
+    <p>Meu email: ${email}<p>
+    <p>Antenciosamente, ${name} <p>
+    ` 
+  }
+
+  transporter.sendMail(mailOptions,
+    (error,info)=>{
+      if (error) {
+        console.log(`Erro ao enviar email: ${error}`);
+      }else{
+        console.log(`Email enviado: ${info.response}`);
+      }
+    }
+  )
 
 }
 
@@ -132,6 +163,7 @@ const resetPassword=async(req,res)=>{
     console.log(`Erro interno do servidor  ${error}`);
   }
 }
+
 
 const newPassword=async(req,res)=>{
 const token=req.params
