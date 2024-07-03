@@ -1,26 +1,24 @@
 const express=require('express')
 const cors=require('cors')
 const process=require('process')
+const session=require('express-session')
 const routes=require('./routes/routes')
 const app=express()
-app.use((err, req, res, next) => {
-    if (res.headersSent) {
-      return next(err);
-    }
-    console.error(err.stack);
-    res.status(500).send('Algo deu errado!');
-  })
+
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(cors())
 
 
+app.use('/', routes)
+app.use('*', routes) 
 
-app.use('/register',routes)
-app.use('/login',routes)
-app.use('/subject',routes)
-app.use('/reset',routes)
-app.use('/newPassword',routes)
+app.use(session({
+  secret:'Secret',
+  resave:false,
+  saveUninitialized:true
+}))
+
 
 
 const PORT=process.env.PORT||4000

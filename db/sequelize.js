@@ -1,6 +1,6 @@
 const Sequelize=require('sequelize');
 
-const sequelize=new Sequelize("dbusers",
+const sequelize=new Sequelize("db_users",
    'root',
    '12345',{
     host:'localhost',

@@ -7,7 +7,8 @@ router.post('/login', userControllers.login)
 router.post('/subject', userControllers.senderMessageService)
 router.post('/reset', userControllers.resetPassword)
 router.post('/newPassword', userControllers.newPassword)
-
+router.post('*', userControllers.notfound)
+router.post('/logout',userControllers.logout)
 
 
 module.exports=router
